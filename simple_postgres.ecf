@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-23-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-23-0 http://www.eiffel.com/developers/xml/configuration-1-23-0.xsd" name="simple_postgres" uuid="8e2bb8a4-1d47-42e3-b789-1ba6ad3b13bc" library_target="simple_postgres">
+	<description>simple_postgres library</description>
+	<target name="simple_postgres">
+		<root all_classes="true"/>
+		<version major="0" minor="0" release="1" build="1"/>
+		<option warning="warning" manifest_array_type="mismatch_warning">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<setting name="console_application" value="true"/>
+		<setting name="dead_code_removal" value="feature"/>
+		<capability>
+			<concurrency support="scoop"/>
+			<void_safety support="all"/>
+		</capability>
+		<external_include location="$(POSTGRESQL_HOME)/include"/>
+		<external_library location="$(POSTGRESQL_HOME)/lib/libpq.lib"/>
+		<library name="base" location="$ISE_LIBRARY/library/base/base.ecf"/>
+		<library name="time" location="$ISE_LIBRARY/library/time/time.ecf"/>
+		<cluster name="src" location="./src/" recursive="true">
+			<file_rule>
+				<exclude>/.git$</exclude>
+				<exclude>/.svn$</exclude>
+				<exclude>/EIFGENs$</exclude>
+			</file_rule>
+		</cluster>
+	</target>
+	<target name="simple_postgres_tests" extends="simple_postgres">
+		<description>Test target for simple_postgres</description>
+		<root class="TEST_APP" feature="make"/>
+		<library name="testing" location="$ISE_LIBRARY/library/testing/testing.ecf"/>
+		<library name="simple_testing" location="D:\prod\simple_testing\simple_testing.ecf"/>
+		<cluster name="tests" location="./testing/" recursive="true"/>
+	</target>
+</system>
