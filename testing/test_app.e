@@ -45,6 +45,10 @@ feature {NONE} -- Test Runners
 			run_test (agent lib_tests.test_execute_ddl, "test_execute_ddl")
 			run_test (agent lib_tests.test_insert_and_query, "test_insert_and_query")
 			run_test (agent lib_tests.test_column_names, "test_column_names")
+			run_test (agent lib_tests.test_affected_rows, "test_affected_rows")
+			run_test (agent lib_tests.test_reconnect, "test_reconnect")
+			run_test (agent lib_tests.test_utf8_data, "test_utf8_data")
+			run_test (agent lib_tests.test_transaction, "test_transaction")
 
 			-- Edge Case Tests
 			print ("%N--- Edge Case Tests ---%N")

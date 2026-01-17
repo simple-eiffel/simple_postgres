@@ -125,6 +125,8 @@ feature -- Query Operations
 			end
 		ensure
 			result_or_error: last_result /= Void or not last_error.is_empty
+			error_cleared_on_success: last_result /= Void implies last_error.is_empty
+			still_connected: is_connected
 		end
 
 	execute (a_sql: STRING)
@@ -136,14 +138,23 @@ feature -- Query Operations
 		local
 			l_handle: POINTER
 			l_ext: PG_EXTERNALS
+			l_cmd_tuples_ptr: POINTER
+			l_c_string: C_STRING
 		do
 			last_error.wipe_out
 			affected_rows := 0
 			l_handle := connection.execute (a_sql)
-			
+
 			if l_handle /= default_pointer and then connection.last_error.is_empty then
 				create l_ext
-				affected_rows := l_ext.c_pqntuples (l_handle)
+				-- Use PQcmdTuples for INSERT/UPDATE/DELETE affected row count
+				l_cmd_tuples_ptr := l_ext.c_pqcmdtuples (l_handle)
+				if l_cmd_tuples_ptr /= default_pointer then
+					create l_c_string.make_by_pointer (l_cmd_tuples_ptr)
+					if l_c_string.string.is_integer then
+						affected_rows := l_c_string.string.to_integer
+					end
+				end
 				l_ext.c_pqclear (l_handle)
 			else
 				last_error := connection.last_error.twin
@@ -152,7 +163,9 @@ feature -- Query Operations
 				end
 			end
 		ensure
-			success_or_error: affected_rows >= 0 or not last_error.is_empty
+			error_cleared_on_success: last_error.is_empty implies affected_rows >= 0
+			error_set_on_failure: not last_error.is_empty implies affected_rows = 0
+			still_connected: is_connected
 		end
 
 feature {NONE} -- Implementation

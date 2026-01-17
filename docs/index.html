@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>simple_postgres - Eiffel Library Documentation</title>
+    <title>simple_postgres - PostgreSQL Client Library for Eiffel</title>
     <style>
         :root { --primary: #2563eb; --secondary: #1e40af; --bg: #f8fafc; --text: #1e293b; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,6 +15,7 @@
         .badge { padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 500; }
         .badge-version { background: #22c55e; }
         .badge-license { background: #eab308; color: #1e293b; }
+        .badge-codegen { background: #8b5cf6; }
         nav { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem; position: sticky; top: 0; z-index: 100; }
         nav ul { list-style: none; display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
         nav a { color: var(--text); text-decoration: none; font-weight: 500; }
@@ -42,10 +43,11 @@
 <body>
     <header>
         <h1>simple_postgres</h1>
-        <p class="tagline"><!-- TODO: Add tagline --></p>
+        <p class="tagline">PostgreSQL client library for Eiffel using libpq</p>
         <div class="badges">
-            <span class="badge badge-version">v0.0.1</span>
+            <span class="badge badge-version">v0.1.0</span>
             <span class="badge badge-license">MIT</span>
+            <span class="badge badge-codegen">Built with simple_codegen</span>
         </div>
     </header>
 
@@ -63,44 +65,77 @@
         <section id="overview">
             <h2>Overview</h2>
             <p>
-                <strong>simple_postgres</strong> is part of the <strong>simple_*</strong> ecosystem
-                of focused, single-purpose Eiffel libraries with full Design by Contract support.
+                <strong>simple_postgres</strong> provides a facade for PostgreSQL database operations.
+                It wraps libpq with Eiffel idioms, offering connection management, query execution,
+                result set access, NULL handling, and transaction support.
             </p>
-            <!-- TODO: Add detailed description -->
+            <p style="margin-top: 1rem;">
+                Part of the <strong>simple_*</strong> ecosystem of focused, single-purpose Eiffel libraries
+                with full Design by Contract support.
+            </p>
         </section>
 
         <section id="quick-start">
             <h2>Quick Start</h2>
             <h3>Installation</h3>
-            <p>Set environment variable and add to your ECF:</p>
-<pre><code><span class="comment">-- Set SIMPLE_EIFFEL=D:\prod</span>
+            <p>Set environment variables and add to your ECF:</p>
+<pre><code><span class="comment">-- Set POSTGRESQL_HOME and PGPASSWORD</span>
+<span class="comment">-- Set SIMPLE_EIFFEL=D:\prod</span>
 &lt;library name="simple_postgres" location="$SIMPLE_EIFFEL/simple_postgres/simple_postgres.ecf"/&gt;</code></pre>
 
-            <h3>Basic Usage</h3>
+            <h3>Basic Query</h3>
 <pre><code><span class="keyword">local</span>
-    l_obj: <span class="type">SIMPLE_POSTGRES</span>
+    db: <span class="type">SIMPLE_POSTGRES</span>
 <span class="keyword">do</span>
-    <span class="keyword">create</span> l_obj.make
-    <span class="comment">-- TODO: Add example</span>
+    <span class="keyword">create</span> db.make
+    db.connect (<span class="string">"host=localhost dbname=mydb user=postgres"</span>)
+
+    <span class="keyword">if</span> db.is_connected <span class="keyword">then</span>
+        db.query (<span class="string">"SELECT name, email FROM users"</span>)
+        <span class="keyword">if</span> <span class="keyword">attached</span> db.last_result <span class="keyword">as</span> res <span class="keyword">then</span>
+            <span class="keyword">across</span> 0 |..| (res.row_count - 1) <span class="keyword">as</span> row <span class="keyword">loop</span>
+                print (res.value_at (row, 0) + <span class="string">": "</span> + res.value_at (row, 1))
+            <span class="keyword">end</span>
+            res.clear
+        <span class="keyword">end</span>
+        db.disconnect
+    <span class="keyword">end</span>
 <span class="keyword">end</span></code></pre>
+
+            <h3>Transaction Example</h3>
+<pre><code>db.execute (<span class="string">"BEGIN"</span>)
+db.execute (<span class="string">"UPDATE accounts SET balance = balance - 100 WHERE id = 1"</span>)
+db.execute (<span class="string">"UPDATE accounts SET balance = balance + 100 WHERE id = 2"</span>)
+db.execute (<span class="string">"COMMIT"</span>)</code></pre>
         </section>
 
         <section id="features">
             <h2>Features</h2>
             <div class="feature-grid">
                 <div class="feature-card">
+                    <h4>Connection Management</h4>
+                    <p>Connect and disconnect with standard PostgreSQL connection strings.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Query Execution</h4>
+                    <p>Execute SELECT queries and access result sets with row/column indexing.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>DML Support</h4>
+                    <p>INSERT, UPDATE, DELETE with affected row counts.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Transaction Support</h4>
+                    <p>BEGIN, COMMIT, ROLLBACK for atomic operations.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>NULL Handling</h4>
+                    <p>Proper detection and handling of NULL values in results.</p>
+                </div>
+                <div class="feature-card">
                     <h4>Design by Contract</h4>
                     <p>Full preconditions, postconditions, and class invariants.</p>
                 </div>
-                <div class="feature-card">
-                    <h4>Void Safety</h4>
-                    <p>Fully void-safe implementation with proper attached/detachable handling.</p>
-                </div>
-                <div class="feature-card">
-                    <h4>SCOOP Compatible</h4>
-                    <p>Ready for concurrent programming with SCOOP.</p>
-                </div>
-                <!-- TODO: Add more feature cards -->
             </div>
         </section>
 
@@ -112,25 +147,49 @@
                     <tr><th>Feature</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code class="inline-code">make</code></td><td>Create instance</td></tr>
-                    <!-- TODO: Add more features -->
+                    <tr><td><code class="inline-code">make</code></td><td>Create disconnected client</td></tr>
+                    <tr><td><code class="inline-code">connect (conn_string)</code></td><td>Connect to database</td></tr>
+                    <tr><td><code class="inline-code">disconnect</code></td><td>Close connection</td></tr>
+                    <tr><td><code class="inline-code">is_connected</code></td><td>Check connection status</td></tr>
+                    <tr><td><code class="inline-code">query (sql)</code></td><td>Execute SELECT, store result</td></tr>
+                    <tr><td><code class="inline-code">execute (sql)</code></td><td>Execute INSERT/UPDATE/DELETE</td></tr>
+                    <tr><td><code class="inline-code">last_result</code></td><td>Result from last query</td></tr>
+                    <tr><td><code class="inline-code">last_error</code></td><td>Error message (empty if none)</td></tr>
+                    <tr><td><code class="inline-code">affected_rows</code></td><td>Rows affected by last execute</td></tr>
+                </tbody>
+            </table>
+
+            <h3>PG_RESULT</h3>
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code class="inline-code">row_count</code></td><td>Number of rows</td></tr>
+                    <tr><td><code class="inline-code">column_count</code></td><td>Number of columns</td></tr>
+                    <tr><td><code class="inline-code">value_at (row, col)</code></td><td>Get value (Void if NULL)</td></tr>
+                    <tr><td><code class="inline-code">column_name (col)</code></td><td>Get column name</td></tr>
+                    <tr><td><code class="inline-code">is_null_at (row, col)</code></td><td>Check if value is NULL</td></tr>
+                    <tr><td><code class="inline-code">is_empty</code></td><td>Check if no rows</td></tr>
+                    <tr><td><code class="inline-code">clear</code></td><td>Free result memory</td></tr>
                 </tbody>
             </table>
         </section>
 
         <section id="testing">
             <h2>Testing</h2>
-            <p>Run the test suite:</p>
+            <p>Run the test suite (15 tests):</p>
 <pre><code>cd simple_postgres
+export POSTGRESQL_HOME="/c/Program Files/PostgreSQL/18"
+export PGPASSWORD="your_password"
 ec.exe -batch -config simple_postgres.ecf -target simple_postgres_tests -c_compile
-./EIFGENs/simple_postgres_tests/F_code/simple_postgres.exe</code></pre>
+./EIFGENs/simple_postgres_tests/W_code/simple_postgres.exe</code></pre>
         </section>
     </main>
 
     <footer>
         <p><strong>simple_postgres</strong> is part of the <a href="https://github.com/simple-eiffel">simple_*</a> ecosystem</p>
         <p>Copyright &copy; 2024-2025 Larry Rix. MIT License.</p>
-        <p style="margin-top: 1rem; font-size: 0.85rem; opacity: 0.7;">Generated by <a href="https://github.com/simple-eiffel/simple_code">simple_codegen</a> - AI-assisted Eiffel code generation</p>
     </footer>
 </body>
 </html>

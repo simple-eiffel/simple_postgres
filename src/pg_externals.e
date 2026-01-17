@@ -81,6 +81,14 @@ feature -- Result Access
 			"return (EIF_INTEGER)PQntuples((PGresult*)$a_result);"
 		end
 
+	c_pqcmdtuples (a_result: POINTER): POINTER
+			-- Return string with number of rows affected by INSERT/UPDATE/DELETE.
+		external
+			"C inline use <libpq-fe.h>"
+		alias
+			"return (char*)PQcmdTuples((PGresult*)$a_result);"
+		end
+
 	c_pqnfields (a_result: POINTER): INTEGER
 			-- Return number of columns in result.
 		external
