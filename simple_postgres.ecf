@@ -13,8 +13,36 @@
 			<concurrency support="scoop"/>
 			<void_safety support="all"/>
 		</capability>
-		<external_include location="$(POSTGRESQL_HOME)/include"/>
-		<external_library location="$(POSTGRESQL_HOME)/lib/libpq.lib"/>
+		<external_cflag value="-I/opt/homebrew/opt/libpq/include">
+			<condition>
+				<platform value="macintosh"/>
+			</condition>
+		</external_cflag>
+		<external_linker_flag value="-L/opt/homebrew/opt/libpq/lib -lpq">
+			<condition>
+				<platform value="macintosh"/>
+			</condition>
+		</external_linker_flag>
+		<external_cflag value="-I/usr/include/postgresql">
+			<condition>
+				<platform value="unix"/>
+			</condition>
+		</external_cflag>
+		<external_linker_flag value="-lpq">
+			<condition>
+				<platform value="unix"/>
+			</condition>
+		</external_linker_flag>
+		<external_include location="$(POSTGRESQL_HOME)/include">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</external_include>
+		<external_library location="$(POSTGRESQL_HOME)/lib/libpq.lib">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</external_library>
 		<library name="base" location="$ISE_LIBRARY/library/base/base.ecf"/>
 		<library name="time" location="$ISE_LIBRARY/library/time/time.ecf"/>
 		<cluster name="src" location="./src/" recursive="true">
@@ -29,7 +57,7 @@
 		<description>Test target for simple_postgres</description>
 		<root class="TEST_APP" feature="make"/>
 		<library name="testing" location="$ISE_LIBRARY/library/testing/testing.ecf"/>
-		<library name="simple_testing" location="D:\prod\simple_testing\simple_testing.ecf"/>
+		<library name="simple_testing" location="$SIMPLE_EIFFEL/simple_testing/simple_testing.ecf"/>
 		<cluster name="tests" location="./testing/" recursive="true"/>
 	</target>
 </system>
