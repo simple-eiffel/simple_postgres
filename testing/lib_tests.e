@@ -283,6 +283,16 @@ feature -- Happy Path Tests
 
 feature -- Edge Case Tests
 
+	test_client_is_found
+			-- The PostgreSQL client library loads where it is installed: on Windows from
+			-- POSTGRESQL_HOME or the installer's registry entry, without PostgreSQL's bin on PATH.
+		local
+			l_connection: PG_CONNECTION
+		do
+			create l_connection.make
+			assert ("client found", l_connection.is_client_available)
+		end
+
 	test_invalid_connection
 			-- Test connection with invalid parameters.
 		local

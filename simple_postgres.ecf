@@ -33,12 +33,27 @@
 				<platform value="unix"/>
 			</condition>
 		</external_linker_flag>
+		<!-- sp_libpq_load.h: finds libpq on Windows (a stub elsewhere) -->
+		<external_include location="$ECF_CONFIG_PATH/Clib"/>
 		<external_include location="$(POSTGRESQL_HOME)/include">
 			<condition>
 				<platform value="windows"/>
 			</condition>
 		</external_include>
 		<external_library location="$(POSTGRESQL_HOME)/lib/libpq.lib">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</external_library>
+		<!-- Windows: libpq is delay-loaded from its owner's folder (POSTGRESQL_HOME, the installer's
+		     registry entry, then the DLL search path), so a program starts without PostgreSQL's bin
+		     on PATH and nothing is copied beside it (BUILD_STANDARDS section 9) -->
+		<external_linker_flag value="-DELAYLOAD:libpq.dll">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</external_linker_flag>
+		<external_library location="delayimp.lib">
 			<condition>
 				<platform value="windows"/>
 			</condition>

@@ -50,10 +50,16 @@ feature -- Connection Operations
 			l_c_string: C_STRING
 		do
 			last_error.wipe_out
-			create l_c_string.make (a_connection_string)
-			connection_handle := c_pqconnectdb (l_c_string.item)
-			
-			if connection_handle = default_pointer then
+			if not c_libpq_available then
+					-- Windows: without a PostgreSQL client, report it rather than fail at the first call
+				last_error := Client_missing
+			else
+				create l_c_string.make (a_connection_string)
+				connection_handle := c_pqconnectdb (l_c_string.item)
+			end
+			if not last_error.is_empty then
+				do_nothing
+			elseif connection_handle = default_pointer then
 				last_error := "Failed to allocate connection"
 			elseif c_pqstatus (connection_handle) /= Connection_ok then
 				last_error := pointer_to_string (c_pqerrormessage (connection_handle))
@@ -103,6 +109,17 @@ feature -- Query Execution
 		ensure
 			result_or_error: Result /= default_pointer or not last_error.is_empty
 		end
+
+feature -- Status
+
+	is_client_available: BOOLEAN
+			-- Can the PostgreSQL client library (libpq) be loaded on this machine?
+		do
+			Result := c_libpq_available
+		end
+
+	Client_missing: STRING = "The PostgreSQL client library (libpq.dll) was not found: install PostgreSQL, or set POSTGRESQL_HOME to its folder"
+			-- `last_error' after `connect' when `is_client_available' is False.
 
 feature {NONE} -- Implementation
 

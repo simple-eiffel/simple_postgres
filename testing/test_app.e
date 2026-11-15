@@ -41,6 +41,7 @@ feature {NONE} -- Test Runners
 			-- Happy Path Tests
 			print ("--- Happy Path Tests ---%N")
 			run_test (agent lib_tests.test_creation, "test_creation")
+			run_test (agent lib_tests.test_client_is_found, "test_client_is_found")
 			run_test (agent lib_tests.test_connect_disconnect, "test_connect_disconnect")
 			run_test (agent lib_tests.test_execute_ddl, "test_execute_ddl")
 			run_test (agent lib_tests.test_insert_and_query, "test_insert_and_query")
