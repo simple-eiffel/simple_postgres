@@ -7,6 +7,18 @@ note
 class
 	PG_EXTERNALS
 
+feature -- The client library
+
+	c_libpq_available: BOOLEAN
+			-- Can the PostgreSQL client library be loaded? On Windows libpq is delay-loaded from
+			-- its owner's folder (POSTGRESQL_HOME, the installer's registry entry, then the DLL
+			-- search path); elsewhere it is linked, so always True.
+		external
+			"C inline use %"sp_libpq_load.h%""
+		alias
+			"return (EIF_BOOLEAN) (sp_libpq_available () != 0);"
+		end
+
 feature -- Connection
 
 	c_pqconnectdb (a_conninfo: POINTER): POINTER
